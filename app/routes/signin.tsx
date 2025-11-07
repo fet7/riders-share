@@ -92,7 +92,7 @@ export default function Signin() {
           </div>
 
           <div className="text-center">
-            <a href="/register" className="text-sm text-primary hover:underline">
+            <a href="/signup" className="text-sm text-primary hover:underline">
               Don't have an account? Sign up
             </a>
           </div>

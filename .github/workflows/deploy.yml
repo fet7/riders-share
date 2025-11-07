@@ -46,7 +46,7 @@ jobs:
           server: ${{ secrets.CPANEL_HOST }}
           ssh_private_key: ${{ secrets.CPANEL_DEPLOY_KEY }}
           local_path: ./deploy/*
-          remote_path: /home/${{ secrets.CPANEL_USER }}/share.ridersshareholder.com/
+          remote_path: /home/${{ secrets.CPANEL_USER }}/share.digatech.co/
           port: 22
           sftp_only: true
           delete_remote_files: false
