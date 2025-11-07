@@ -1,9 +1,6 @@
 import mariadb from "mariadb";
 
-console.log('DB_HOST:', process.env.db_host);
-console.log('DB_USER:', process.env.db_user);
-console.log('DB_PASSWORD:', process.env.db_password ? '*****' : '<empty>');
-console.log('DB_NAME:', process.env.db_name);
+import 'dotenv/config';
 
 const pool = mariadb.createPool({
   host: process.env.db_host,
