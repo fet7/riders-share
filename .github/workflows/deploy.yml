@@ -1,0 +1,69 @@
+name: Build & Deploy React Router SSR to cPanel via SFTP
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ Checkout source
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2️⃣ Setup Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # 3️⃣ Install and build
+      - name: Build SSR app
+        run: |
+          npm ci
+          npm run build
+
+      # 4️⃣ Prepare deployment package
+      # Upload only what's needed (no dev files or node_modules)
+      - name: Prepare deploy package
+        run: |
+          mkdir deploy
+          cp -r build deploy/
+          cp -r public deploy/ 2>/dev/null || true
+          cp package.json package-lock.json deploy/
+          cp server.js deploy/ 2>/dev/null || true
+          cp start.cjs deploy/ 2>/dev/null || true
+          cp -r dist deploy/ 2>/dev/null || true
+
+      # 5️⃣ Upload via SFTP
+      - name: 🚀 Deploy via SFTP
+        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
+        with:
+          username: ${{ secrets.CPANEL_USER }}
+          server: ${{ secrets.CPANEL_HOST }}
+          ssh_private_key: ${{ secrets.CPANEL_DEPLOY_KEY }}
+          local_path: ./deploy/*
+          remote_path: /home/${{ secrets.CPANEL_USER }}/share.ridersshareholder.com/
+          port: 22
+          sftp_only: true
+          delete_remote_files: false
+
+      # 6️⃣ SSH to install production deps and restart Passenger
+      - name: Install deps + restart Passenger
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.CPANEL_DEPLOY_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.CPANEL_HOST }} >> ~/.ssh/known_hosts
+
+          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no \
+            ${{ secrets.CPANEL_USER }}@${{ secrets.CPANEL_HOST }} << 'EOF'
+            cd /home/${{ secrets.CPANEL_USER }}/share.ridersshareholder.com
+            npm ci --omit=dev
+            mkdir -p tmp
+            touch tmp/restart.txt
+            echo "✅ SSR app deployed and restarted at $(date)"
+          EOF
