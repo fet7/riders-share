@@ -17,14 +17,6 @@ export async function action({ request }: { request: Request }) {
   const shareholder_id = formData.get("shareholder_id")?.toString();
   const data = Object.fromEntries(formData);
 
-  // // 🧪 Artificially simulate a failure for testing rollback
-  // if (formData.get("simulateError") === "true") {
-  //   return {
-  //     success: false,
-  //     error: "Simulated failure from server.",
-  //   };
-  // }
-
   const result = await handleAction({ actionType, shareholder_id, data });
 
   // ✅ Return consistent structure for RecordManager with processed flag and validation errors
