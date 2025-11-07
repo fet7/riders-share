@@ -1,5 +1,3 @@
-// app/routes/api.shareholders.$id.deposits.tsx
-
 import { data } from "react-router";
 import { getShareholderDeposits } from "../sub-form/helpers/services.server";
 
